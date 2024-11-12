@@ -11,7 +11,11 @@ import {
   TextInput,
   FlatList,
 } from "react-native";
-import { Inter_400Regular, useFonts } from "@expo-google-fonts/inter";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  useFonts,
+} from "@expo-google-fonts/inter";
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LottieView from "lottie-react-native";
@@ -42,6 +46,7 @@ export default function Index() {
 
   const [loaded, error] = useFonts({
     Inter_400Regular,
+    Inter_500Medium,
   });
 
   useEffect(() => {
@@ -127,23 +132,27 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.today}>Whats cookin' today?</Text>
-      {/* Lottie animation */}
-      <LottieView
-        source={require("../assets/animations/fireAnimation.json")} // Path to your Lottie JSON file
-        autoPlay // Automatically play the animation
-        loop // Loop the animation
-        style={{
-          width: 80,
-          height: 80,
-          position: "absolute",
-          top: 5,
-          right: 10,
-        }}
-      />
-      <Text style={styles.currentDate}>
-        {fullMonthName} {currentDate.getDate()}, {currentDate.getFullYear()}
-      </Text>
+      <View style={styles.headerContainer}>
+        <View>
+          <Text style={styles.today}>Today</Text>
+          <Text style={styles.currentDate}>
+            {fullMonthName} {currentDate.getDate()}, {currentDate.getFullYear()}
+          </Text>
+        </View>
+        {/* Lottie animation */}
+        <LottieView
+          source={require("../assets/animations/fireAnimation.json")} // Path to your Lottie JSON file
+          autoPlay // Automatically play the animation
+          loop // Loop the animation
+          style={{
+            width: 80,
+            height: 80,
+            position: "absolute",
+            right: 5,
+            top: 15,
+          }}
+        />
+      </View>
 
       <View style={styles.listContainer}>
         <FlatList
@@ -152,14 +161,14 @@ export default function Index() {
           renderItem={({ item }) => (
             <View style={styles.todoListView}>
               <TouchableOpacity
-                onPress={() => toggleCompletion(item.id)} // Toggle completion on press
+                onPress={() => toggleCompletion(item.id)}
                 onLongPress={() => handleDeleteButton(item.id)}
                 style={styles.flatListButtonView}
               >
                 <Text
                   style={[
                     styles.todoListText,
-                    item.completed && styles.strikethrough, // Apply strikethrough if completed
+                    item.completed && styles.strikethrough,
                   ]}
                 >
                   {item.text}
@@ -167,9 +176,13 @@ export default function Index() {
               </TouchableOpacity>
             </View>
           )}
+          ListEmptyComponent={
+            <View style={styles.emptyListContainer}>
+              <Text style={styles.emptyListText}>No tasks yet</Text>
+            </View>
+          }
         />
       </View>
-      <View style={styles.horizontalLine}></View>
       <TouchableOpacity
         style={styles.addButtonPosition}
         onPress={handleAddButton}
@@ -260,20 +273,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "white",
-    marginTop: 30,
+    marginTop: 90,
   },
   today: {
-    position: "absolute",
-    top: 10,
-    left: 10,
     fontSize: 22,
     fontFamily: "Inter_400Regular",
+    color: "white",
   },
   currentDate: {
-    position: "absolute",
-    top: 50,
-    left: 15,
     fontFamily: "Inter_400Regular",
+    color: "white",
   },
   buttonSettingImage: {
     width: 40,
@@ -283,14 +292,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 20,
     right: 10,
-  },
-  horizontalLine: {
-    position: "absolute",
-    top: 80,
-    borderBottomWidth: 2,
-    borderBottomColor: "#000",
-    width: "95%",
-    marginVertical: 10,
   },
   addButtonImage: {
     width: 70,
@@ -307,7 +308,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalView: {
-    backgroundColor: "#ccaa66",
+    backgroundColor: "#4B332C",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -354,8 +355,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   listContainer: {
-    marginTop: 100,
-    paddingBottom: 90, // Ensure space at the bottom for the add button
+    marginTop: 10,
+    paddingBottom: 50, // Ensure space at the bottom for the add button
+    backgroundColor: "#23191A",
+    borderWidth: 2,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 150,
+    marginHorizontal: 10,
   },
   textStyle: {
     color: "white",
@@ -424,12 +431,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     width: "100%",
-    backgroundColor: "#ccaa66",
+    backgroundColor: "#463436",
     height: 65, // Fixed height for consistency
     justifyContent: "center", // Center the text vertically
     textAlignVertical: "center", // Ensure text is vertically centered
     fontFamily: "Inter_400Regular",
     paddingLeft: 20,
+    color: "white",
   },
   flatListButtonView: {
     width: "98%",
@@ -438,5 +446,29 @@ const styles = StyleSheet.create({
   strikethrough: {
     textDecorationLine: "line-through",
     color: "gray",
+  },
+  headerContainer: {
+    backgroundColor: "#4B332C",
+    borderWidth: 1,
+    padding: 10,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 30,
+    paddingBottom: 20,
+  },
+  emptyListContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    paddingHorizontal: 110,
+  },
+  emptyListText: {
+    fontSize: 18,
+    color: "gray",
+    fontFamily: "Inter_400Regular",
   },
 });
