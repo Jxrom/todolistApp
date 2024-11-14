@@ -19,11 +19,13 @@ import {
 import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LottieView from "lottie-react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 type Todo = {
   id: string;
   text: string;
   completed?: boolean;
+  time?: string;
 };
 
 export default function Index() {
@@ -43,6 +45,11 @@ export default function Index() {
   // Experimental
   const [todosExp, setTodosExp] = useState([]);
   const [input, setInput] = useState("");
+
+  // For datetimepicker
+  const [time, setTime] = useState(new Date());
+  const [showPicker, setShowPicker] = useState(false);
+  const [selectedTime, setSelectedTime] = useState("");
 
   const [loaded, error] = useFonts({
     Inter_400Regular,
@@ -86,12 +93,17 @@ export default function Index() {
   // Add a new todo
   const addTodo = () => {
     if (input.trim() === "") return;
-    const newTodo = { id: Date.now().toString(), text: input };
+    const newTodo = {
+      id: Date.now().toString(),
+      text: input,
+      time: selectedTime,
+    };
     const updatedTodos = [...todos, newTodo];
     setTodos(updatedTodos);
     saveTodos(updatedTodos); // Save updated todos
     setInput(""); // Clear input
     setModalVisible(false);
+    setSelectedTime(""); // Reset the selected time
   };
 
   // Remove a todo
@@ -128,6 +140,18 @@ export default function Index() {
     );
     setTodos(updatedTodos);
     saveTodos(updatedTodos); // Save updated todos
+  };
+
+  const onTimeChange = (event, time) => {
+    setShowPicker(false);
+    if (time) {
+      const formattedTime = time.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      setSelectedTime(formattedTime);
+      console.log(selectedTime);
+    }
   };
 
   return (
@@ -173,6 +197,9 @@ export default function Index() {
                 >
                   {item.text}
                 </Text>
+                {item.time && (
+                  <Text style={styles.todoTimeText}>{item.time}</Text>
+                )}
               </TouchableOpacity>
             </View>
           )}
@@ -208,7 +235,6 @@ export default function Index() {
       >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <View></View>
             <TextInput
               style={styles.textInput}
               placeholder="Input your new task here"
@@ -218,16 +244,36 @@ export default function Index() {
               onChangeText={setInput}
               ref={textInputRef}
             />
-            <TouchableOpacity
-              style={styles.buttonClose}
-              //onPress={handleCheckButton}
-              onPress={addTodo}
-            >
-              <Image
-                source={require("./../assets/buttonImages/checkButton.png")}
-                style={styles.buttonSettingImage}
-              />
-            </TouchableOpacity>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                //onPress={handleCheckButton}
+                onPress={() => setShowPicker(true)}
+                style={styles.buttonAlarm}
+              >
+                <Image
+                  style={styles.buttonSettingImage}
+                  source={require("./../assets/buttonImages/setHour.png")}
+                />
+                {showPicker && (
+                  <DateTimePicker
+                    value={time}
+                    mode="time"
+                    display="default"
+                    onChange={onTimeChange}
+                  />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonCheck}
+                //onPress={handleCheckButton}
+                onPress={addTodo}
+              >
+                <Image
+                  source={require("./../assets/buttonImages/checkButton.png")}
+                  style={styles.buttonSettingImage}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -272,7 +318,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: "#23191A",
     marginTop: 90,
   },
   today: {
@@ -328,12 +374,8 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
   },
-  buttonClose: {
-    backgroundColor: "white",
-    position: "absolute",
-    top: 40,
-    right: 30,
-  },
+  buttonCheck: {},
+  buttonAlarm: {},
   textInput: {
     height: 60,
     width: "100%",
@@ -358,7 +400,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     paddingBottom: 50, // Ensure space at the bottom for the add button
     backgroundColor: "#23191A",
-    borderWidth: 2,
     borderRadius: 10,
     padding: 10,
     marginBottom: 150,
@@ -405,7 +446,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F194FF",
   },
   deleteButtonClose: {
-    backgroundColor: "#2196F3",
+    backgroundColor: "#4B332C",
   },
   deleteButtonTextStyle: {
     color: "white",
@@ -470,5 +511,20 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "gray",
     fontFamily: "Inter_400Regular",
+  },
+  buttonContainer: {
+    padding: 10,
+    position: "absolute",
+    flexDirection: "row",
+    top: 30,
+    right: 20,
+  },
+  todoTimeText: {
+    fontSize: 14,
+    color: "lightgray",
+    fontFamily: "Inter_400Regular",
+    position: "absolute",
+    right: 10,
+    top: 5,
   },
 });
